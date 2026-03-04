@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <title>SimuPaie Pro</title>
-    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,124 +11,74 @@
     <link rel="apple-touch-icon" href="icon.png">
 
     <style>
-        /* Reset complet pour éviter le mode "Vue Ordinateur" */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
         html, body { 
-            margin: 0; 
-            padding: 0; 
-            width: 100%; 
-            overflow-x: hidden; /* Empêche le glissement horizontal */
+            margin: 0; padding: 0; width: 100%; 
             background-color: #f1f5f9;
             font-family: -apple-system, system-ui, sans-serif;
+            color: #1e293b;
         }
 
         header {
-            background: #1e293b;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: #1e293b; color: white; padding: 12px;
+            text-align: center; font-weight: bold; font-size: 1rem;
+            position: sticky; top: 0; z-index: 10;
         }
 
-        .container {
-            padding: 15px;
-            width: 100%;
-        }
+        .container { padding: 10px; width: 100%; padding-bottom: 100px; }
 
         .card {
-            background: white;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
+            background: white; border-radius: 12px; padding: 12px;
+            margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0; position: relative;
         }
 
-        label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            margin-bottom: 8px;
-        }
+        h2 { font-size: 0.9rem; margin: 15px 0 8px 0; color: #64748b; text-transform: uppercase; }
+
+        label { display: block; font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
 
         input, select {
-            width: 100%;
-            display: block;
-            background: #fff;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 14px;
-            font-size: 16px; /* 16px minimum pour éviter le zoom auto iOS */
-            margin-bottom: 15px;
-            outline: none;
+            width: 100%; background: #fff; border: 1px solid #cbd5e0;
+            border-radius: 8px; padding: 10px; font-size: 15px; margin-bottom: 10px;
+            height: 40px;
         }
 
-        input:focus { border-color: #334155; }
+        .res-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .res-item { background: #f8fafc; padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #f1f5f9; }
+        .res-label { font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; display: block; }
+        .res-val { font-weight: 700; font-size: 0.85rem; color: #1e293b; }
 
-        /* Grille de résultats */
-        .res-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
+        .total-card-val { 
+            background: #f1f5f9; padding: 8px; 
+            border-radius: 8px; text-align: center; margin-top: 8px;
+            border: 1px dashed #cbd5e0;
         }
-
-        .res-item {
-            background: #f8fafc;
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .res-item span { display: block; }
-        .res-label { font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px; }
-        .res-val { font-weight: 800; font-size: 1rem; color: #1e293b; }
-
-        .total-banner {
-            background: #1e293b;
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            margin-top: 15px;
-        }
-
-        .total-banner .val { font-size: 1.6rem; font-weight: 900; display: block; }
 
         .btn-add {
-            background: #166534;
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 14px;
-            font-weight: bold;
-            font-size: 1rem;
-            margin-bottom: 30px;
+            background: #166534; color: white; border: none;
+            width: 100%; padding: 14px; border-radius: 10px;
+            font-weight: bold; font-size: 0.9rem; margin-bottom: 15px;
         }
 
-        .diff-tag {
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: bold;
-            margin-top: 5px;
-            display: inline-block;
+        /* BANDEAU TOTAL FIXE */
+        .footer-total {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: #1e293b; color: white;
+            padding: 15px 20px; box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 100;
         }
+        .footer-total .label { font-size: 0.7rem; color: #94a3b8; text-transform: uppercase; font-weight: bold; }
+        .footer-total .price { font-size: 1.3rem; font-weight: 900; color: #4ade80; }
+
+        .delete-btn {
+            position: absolute; top: 8px; right: 12px;
+            color: #ef4444; font-weight: bold; font-size: 1.2rem; padding: 5px;
+        }
+
+        .diff-tag { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; font-weight: bold; margin-top: 4px; display: inline-block; }
         .pos { background: #dcfce7; color: #166534; }
         .neg { background: #fee2e2; color: #991b1b; }
-
-        .delete-icon {
-            float: right;
-            color: #cbd5e0;
-            font-size: 1.5rem;
-            line-height: 1;
-        }
     </style>
 </head>
 <body>
@@ -139,37 +87,34 @@
 
 <div class="container">
     <div id="list"></div>
-    
     <button class="btn-add" onclick="addCard()">+ Ajouter un employé</button>
 
-    <div class="card" style="border-top: 4px solid #334155;">
-        <label>Comparateur (Net Actuel)</label>
+    <h2>Comparateur Prorata</h2>
+    <div class="card" style="border-top: 3px solid #1e293b;">
+        <label>Salaire Net Actuel (€)</label>
         <input type="number" id="base" value="1650" oninput="compare()">
-        
-        <div style="display: flex; gap: 10px;">
-            <div style="flex:1">
-                <label>Heures Départs</label>
-                <input type="number" id="h1" value="39" oninput="compare()">
-            </div>
-            <div style="flex:1">
-                <label>Heures Fins</label>
-                <input type="number" id="h2" value="24" oninput="compare()">
-            </div>
+        <div style="display: flex; gap: 8px;">
+            <div style="flex:1"><label>H. Départ</label><input type="number" id="h1" value="39" oninput="compare()"></div>
+            <div style="flex:1"><label>H. Arrivée</label><input type="number" id="h2" value="24" oninput="compare()"></div>
         </div>
-
         <div class="res-grid">
             <div class="res-item">
                 <span class="res-label">Nouv. Net</span>
-                <span class="res-val" id="rNet">0 €</span>
+                <span class="res-val" id="rNet">0 €</span><br>
                 <span id="dNet" class="diff-tag"></span>
             </div>
             <div class="res-item">
                 <span class="res-label">Nouv. Coût</span>
-                <span class="res-val" id="rCost">0 €</span>
+                <span class="res-val" id="rCost">0 €</span><br>
                 <span id="dCost" class="diff-tag"></span>
             </div>
         </div>
     </div>
+</div>
+
+<div class="footer-total">
+    <div><span class="label">Total Masse Salariale</span></div>
+    <div><span class="price" id="grandTotal">0 €</span></div>
 </div>
 
 <script>
@@ -188,19 +133,28 @@
         const id = Date.now();
         document.getElementById('list').insertAdjacentHTML('beforeend', `
             <div class="card" id="${id}">
-                <span class="delete-icon" onclick="document.getElementById('${id}').remove(); compare()">&times;</span>
-                <label>Profil</label>
-                <select onchange="up(${id})" class="t">
-                    <option value="s">Salarié Standard</option>
-                    <option value="a">Apprenti</option>
-                </select>
-                <label>Net (€)</label>
-                <input type="number" class="n" value="1650" oninput="up(${id})">
+                <div class="delete-btn" onclick="document.getElementById('${id}').remove(); calculateGlobalTotal()">&times;</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 0;">
+                    <div style="flex:1.5">
+                        <label>Profil</label>
+                        <select onchange="up(${id})" class="t">
+                            <option value="s">Standard</option>
+                            <option value="a">Apprenti</option>
+                        </select>
+                    </div>
+                    <div style="flex:1">
+                        <label>Net (€)</label>
+                        <input type="number" class="n" value="1650" oninput="up(${id})">
+                    </div>
+                </div>
                 <div class="res-grid">
                     <div class="res-item"><span class="res-label">Brut</span><span class="res-val b">0 €</span></div>
-                    <div class="res-item"><span class="res-label">Charges Pat.</span><span class="res-val p">0 €</span></div>
+                    <div class="res-item"><span class="res-label">Patronal</span><span class="res-val p">0 €</span></div>
                 </div>
-                <div class="total-banner"><span class="res-label" style="color:#94a3b8">Coût Total</span><span class="val t-res">0 €</span></div>
+                <div class="total-card-val">
+                    <span class="res-label" style="display:inline">Coût : </span>
+                    <span class="res-val item-total" style="display:inline">0 €</span>
+                </div>
             </div>
         `);
         up(id);
@@ -212,7 +166,18 @@
         const res = getCalc(net, c.querySelector('.t').value === 'a');
         c.querySelector('.b').innerText = res.br.toLocaleString() + " €";
         c.querySelector('.p').innerText = res.pat.toLocaleString() + " €";
-        c.querySelector('.t-res').innerText = res.tot.toLocaleString() + " €";
+        const totalSpan = c.querySelector('.item-total');
+        totalSpan.innerText = res.tot.toLocaleString() + " €";
+        totalSpan.setAttribute('data-val', res.tot);
+        calculateGlobalTotal();
+    }
+
+    function calculateGlobalTotal() {
+        let total = 0;
+        document.querySelectorAll('.item-total').forEach(el => {
+            total += parseInt(el.getAttribute('data-val')) || 0;
+        });
+        document.getElementById('grandTotal').innerText = total.toLocaleString() + " €";
         compare();
     }
 
@@ -223,16 +188,13 @@
         const nN = Math.round(b * (h2 / h1));
         const c1 = getCalc(b, false).tot;
         const c2 = getCalc(nN, false).tot;
-        
         document.getElementById('rNet').innerText = nN.toLocaleString() + " €";
         document.getElementById('rCost').innerText = c2.toLocaleString() + " €";
-        
         const dN = nN - b;
-        document.getElementById('dNet').innerText = (dN > 0 ? "+" : "") + dN + " €";
+        document.getElementById('dNet').innerText = (dN > 0 ? "+" : "") + dN.toLocaleString() + " €";
         document.getElementById('dNet').className = "diff-tag " + (dN >= 0 ? "pos" : "neg");
-        
         const dC = c2 - c1;
-        document.getElementById('dCost').innerText = (dC > 0 ? "+" : "") + dC + " €";
+        document.getElementById('dCost').innerText = (dC > 0 ? "+" : "") + dC.toLocaleString() + " €";
         document.getElementById('dCost').className = "diff-tag " + (dC <= 0 ? "pos" : "neg");
     }
 
