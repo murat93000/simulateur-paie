@@ -2,170 +2,225 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SimuPaie - Simulateur de Coût Salarial</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SimuPaie Pro - Calculateur Mobile</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#2b6cb0">
+    <meta name="theme-color" content="#1E293B">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
     <style>
         :root {
-            --primary: #2b6cb0;
-            --secondary: #2f855a;
-            --danger: #c53030;
-            --bg: #f7fafc;
+            --bg: #F1F5F9;
+            --surface: #FFFFFF;
+            --text-main: #1E293B;
+            --text-secondary: #64748B;
+            --primary: #334155;
+            --secondary: #166534;
+            --danger: #991B1B;
+            --primary-light: #E2E8F0;
         }
 
         body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; 
             background-color: var(--bg); 
             margin: 0; 
-            padding: 15px;
-            color: #2d3748;
-            -webkit-tap-highlight-color: transparent;
+            padding: 0;
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            overscroll-behavior-y: none; /* Évite l'effet de rebond iOS */
         }
 
-        .container { max-width: 600px; margin: auto; padding-bottom: 40px; }
+        /* Barre d'état et En-tête */
+        header {
+            background-color: var(--primary);
+            color: #fff;
+            padding: 18px 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-        h1 { font-size: 1.6rem; text-align: center; color: var(--primary); margin: 10px 0 20px 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        h2 { font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px; color: #4a5568; }
+        header h1 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
 
+        /* Conteneur principal */
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px 15px 60px 15px; /* Grand padding bas pour les doigts */
+        }
+
+        h2 { font-size: 1.1rem; color: var(--primary); margin: 35px 0 15px 0; border-left: 4px solid var(--primary); padding-left: 10px; }
+
+        /* Style des cartes */
         .card { 
-            background: white; 
-            padding: 18px; 
-            border-radius: 15px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
-            margin-bottom: 20px;
+            background: var(--surface); 
+            padding: 20px; 
+            border-radius: 16px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            margin-bottom: 25px;
             position: relative;
         }
 
-        .row { display: flex; flex-direction: column; margin-bottom: 12px; }
-        label { font-weight: bold; font-size: 0.85rem; margin-bottom: 6px; color: #718096; }
+        /* Styles de saisie mobile */
+        .input-group { margin-bottom: 18px; }
+        
+        label { 
+            font-weight: 600; 
+            font-size: 0.8rem; 
+            color: var(--text-secondary); 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
 
         input, select { 
-            padding: 12px; 
-            border: 1px solid #cbd5e0; 
-            border-radius: 10px; 
-            font-size: 1rem;
+            width: 100%;
+            padding: 16px; 
+            border: 2px solid var(--primary-light); 
+            border-radius: 12px; 
+            font-size: 1.1rem;
             background: #fff;
-            color: #2d3748;
+            color: var(--text-main);
             outline: none;
-            transition: border-color 0.2s;
+            box-sizing: border-box; /* Crucial pour le mobile */
+            -webkit-appearance: none;
         }
         
         input:focus { border-color: var(--primary); }
 
-        .grid-results { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 12px; 
-            margin-top: 15px; 
+        /* Zone de résultats principaux */
+        .results-highlight { 
+            background: #F8FAFC;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
         }
 
-        .res-box { 
-            background: #f1f5f9; 
-            padding: 12px; 
-            border-radius: 10px; 
-            text-align: center;
-        }
+        .result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .result-row:last-child { margin-bottom: 0; }
 
-        .res-label { font-size: 0.7rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
-        .res-val { font-weight: bold; font-size: 1.1rem; display: block; margin-top: 4px; }
+        .res-label { font-size: 0.95rem; color: var(--text-secondary); }
+        .res-val { font-weight: 700; font-size: 1.2rem; }
 
-        .total-box { 
+        /* Le "Coup de Poing" du coût total */
+        .total-highlight {
             grid-column: span 2; 
             background: var(--primary); 
             color: white; 
-            padding: 15px;
+            padding: 18px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 15px;
         }
+        .total-label { color:rgba(255,255,255,0.7); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .total-val { display: block; font-weight: 800; font-size: 1.8rem; margin-top: 5px; }
 
+        /* Boutons tactiles */
         .btn-add {
             width: 100%;
             background: var(--secondary);
             color: white;
             border: none;
-            padding: 16px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 1rem;
-            margin-top: 10px;
+            padding: 18px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1.1rem;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(47, 133, 90, 0.2);
+            box-shadow: 0 4px 10px rgba(22, 101, 52, 0.2);
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .comp-header { display: flex; justify-content: space-between; gap: 10px; }
-        .comp-header div { flex: 1; }
+        .btn-add:active { opacity: 0.8; }
 
-        .diff-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; margin-top: 5px; display: inline-block; }
-        .tag-pos { background: #c6f6d5; color: #22543d; }
-        .tag-neg { background: #fed7d7; color: #822727; }
+        /* Style des Tags de différence */
+        .diff-tag { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+        .tag-pos { background: #DCFCE7; color: #166534; }
+        .tag-neg { background: #FEE2E2; color: #991B1B; }
 
+        /* Bouton de suppression subtil */
         .delete-btn { 
             position: absolute;
             top: 10px;
             right: 15px;
-            color: #a0aec0; 
-            font-size: 1.5rem;
+            color: var(--primary-light); 
+            font-size: 1.6rem;
             cursor: pointer; 
+            -webkit-tap-highlight-color: transparent;
         }
+        .delete-btn:active { color: var(--danger); }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>SimuPaie</h1>
+<header>
+    <h1>SimuPaie Pro</h1>
+</header>
 
+<div class="app-container">
     <div id="employee-list">
         </div>
 
-    <button class="btn-add" onclick="addEmployeeCard()">+ Ajouter un employé</button>
+    <button class="btn-add" onclick="addEmployeeCard()">+ Ajouter une simulation</button>
 
     <h2>Changement d'heures (Prorata)</h2>
     <div class="card">
-        <div class="row">
-            <label>Salaire Net de référence (€)</label>
+        <div class="input-group">
+            <label>Salaire Net actuel (€)</label>
             <input type="number" id="baseNet" value="1650" oninput="runComparison()" placeholder="Ex: 2300">
         </div>
-        <div class="comp-header">
-            <div>
-                <label>H. Actuelles</label>
+        
+        <div style="display: flex; gap: 15px;">
+            <div style="flex:1">
+                <label>Heures Départs</label>
                 <input type="number" id="hStart" value="39" oninput="runComparison()">
             </div>
-            <div>
+            <div style="flex:1">
                 <label>Nouv. Heures</label>
                 <input type="number" id="hEnd" value="24" oninput="runComparison()">
             </div>
         </div>
 
-        <div class="grid-results">
-            <div class="res-box">
-                <span class="res-label">Nouveau Net</span>
-                <span class="res-val" id="compNet">0 €</span>
-                <span id="diffNetLabel" class="diff-tag"></span>
+        <div class="results-highlight">
+            <div class="result-row">
+                <span class="res-label">Nouveau Salaire Net</span>
+                <div style="text-align:right">
+                    <span class="res-val" id="compNet">0 €</span>
+                    <span id="diffNetLabel" class="diff-tag"></span>
+                </div>
             </div>
-            <div class="res-box">
-                <span class="res-label">Nouveau Coût</span>
-                <span class="res-val" id="compCost">0 €</span>
-                <span id="diffCostLabel" class="diff-tag"></span>
+            <div class="result-row">
+                <span class="res-label">Nouveau Coût Total</span>
+                <div style="text-align:right">
+                    <span class="res-val" id="compCost">0 €</span>
+                    <span id="diffCostLabel" class="diff-tag"></span>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- CALCULS SOCIAUX ---
+    // --- CALCULS SOCIAUX (MODE FRANCE SANS DÉTAIL) ---
     function getDetails(net, type) {
         let brut, patronal;
         if (type === "apprenti") {
             brut = net;
-            patronal = net * 0.05; // Forfaitaire pour mutuelle/taxes
+            patronal = net * 0.05; 
         } else {
             brut = net * 1.282; // Remontée vers le brut
-            let ratio = brut / 1766; // Ratio SMIC
-            // Simulation réduction Fillon simplifiée
+            let ratio = brut / 1766; // SMIC
+            // Simulation dégréssivité Fillon (Charges patronales)
             if (ratio < 1.6) patronal = brut * 0.12;
             else if (ratio < 2.5) patronal = brut * 0.32;
             else patronal = brut * 0.45;
@@ -177,36 +232,37 @@
         };
     }
 
-    // --- INTERFACE ---
+    // --- INTERFACE MOBILE ---
     function addEmployeeCard() {
         const id = Date.now();
         const html = `
             <div class="card" id="card-${id}">
                 <div class="delete-btn" onclick="removeCard(${id})">&times;</div>
-                <div class="row">
+                <div class="input-group">
                     <label>Type de profil</label>
                     <select class="type" onchange="updateCard(${id})">
-                        <option value="35h">Salarié (Charges Classiques)</option>
+                        <option value="35h">Salaire Standard (Charges)</option>
                         <option value="apprenti">Apprenti (Exonéré)</option>
                     </select>
                 </div>
-                <div class="row">
-                    <label>Salaire Net (€)</label>
-                    <input type="number" class="net-val" value="1650" oninput="updateCard(${id})" placeholder="Entrez le net">
+                <div class="input-group">
+                    <label>Salaire Net Souhaité (€)</label>
+                    <input type="number" class="net-val" value="1650" oninput="updateCard(${id})" placeholder="Ex: 2300">
                 </div>
-                <div class="grid-results">
-                    <div class="res-box">
-                        <span class="res-label">Brut (est.)</span>
-                        <span class="brut-res">0 €</span>
+                
+                <div class="results-highlight">
+                    <div class="result-row">
+                        <span class="res-label">Brut estimé</span>
+                        <span class="res-val brut-res">0 €</span>
                     </div>
-                    <div class="res-box">
-                        <span class="res-label">Charges Pat.</span>
-                        <span class="pat-res">0 €</span>
+                    <div class="result-row">
+                        <span class="res-label">Part Patronale</span>
+                        <span class="res-val pat-res">0 €</span>
                     </div>
-                    <div class="res-box total-box">
-                        <span class="res-label" style="color:rgba(255,255,255,0.7)">Coût Total Employeur</span>
-                        <span class="total-res">0 €</span>
-                    </div>
+                </div>
+                <div class="total-highlight">
+                    <span class="total-label">Coût Total Mensuel</span>
+                    <span class="total-val total-res">0 €</span>
                 </div>
             </div>
         `;
@@ -226,9 +282,12 @@
         const type = card.querySelector('.type').value;
         const res = getDetails(net, type);
 
-        card.querySelector('.brut-res').innerText = res.brut.toLocaleString('fr-FR') + " €";
-        card.querySelector('.pat-res').innerText = res.pat.toLocaleString('fr-FR') + " €";
-        card.querySelector('.total-res').innerText = res.total.toLocaleString('fr-FR') + " €";
+        // Formatage en Euros standard
+        const f = (val) => val.toLocaleString('fr-FR') + " €";
+
+        card.querySelector('.brut-res').innerText = f(res.brut);
+        card.querySelector('.pat-res').innerText = f(res.pat);
+        card.querySelector('.total-res').innerText = f(res.total);
         runComparison();
     }
 
@@ -241,23 +300,26 @@
         const oldCost = getDetails(netBase, "35h").total;
         const newCost = getDetails(newNet, "35h").total;
 
-        document.getElementById('compNet').innerText = newNet.toLocaleString('fr-FR') + " €";
-        document.getElementById('compCost').innerText = newCost.toLocaleString('fr-FR') + " €";
+        // Formatage en Euros standard
+        const f = (val) => val.toLocaleString('fr-FR') + " €";
+
+        document.getElementById('compNet').innerText = f(newNet);
+        document.getElementById('compCost').innerText = f(newCost);
 
         // Différence Net
         const dNet = newNet - netBase;
         const dNetL = document.getElementById('diffNetLabel');
-        dNetL.innerText = (dNet > 0 ? "+" : "") + dNet.toLocaleString('fr-FR') + " €";
+        dNetL.innerText = (dNet > 0 ? "↑ +" : "↓ ") + f(dNet);
         dNetL.className = "diff-tag " + (dNet >= 0 ? "tag-pos" : "tag-neg");
 
         // Différence Coût
         const dCost = newCost - oldCost;
         const dCostL = document.getElementById('diffCostLabel');
-        dCostL.innerText = (dCost > 0 ? "+" : "") + dCost.toLocaleString('fr-FR') + " €";
+        dCostL.innerText = (dCost > 0 ? "↑ +" : "↓ ") + f(dCost);
         dCostL.className = "diff-tag " + (dCost <= 0 ? "tag-pos" : "tag-neg");
     }
 
-    // Enregistrement PWA
+    // PWA Service Worker
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
