@@ -3,335 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SimuPaie Pro - Calculateur Mobile</title>
+    
+    <title>SimuPaie Pro</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1E293B">
+    <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon.png">
 
     <style>
-        :root {
-            --bg: #F1F5F9;
-            --surface: #FFFFFF;
-            --text-main: #1E293B;
-            --text-secondary: #64748B;
-            --primary: #334155;
-            --secondary: #166534;
-            --danger: #991B1B;
-            --primary-light: #E2E8F0;
-        }
-
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; 
-            background-color: var(--bg); 
+        /* Reset complet pour éviter le mode "Vue Ordinateur" */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        html, body { 
             margin: 0; 
-            padding: 0;
-            color: var(--text-main);
-            -webkit-font-smoothing: antialiased;
-            overscroll-behavior-y: none; /* Évite l'effet de rebond iOS */
+            padding: 0; 
+            width: 100%; 
+            overflow-x: hidden; /* Empêche le glissement horizontal */
+            background-color: #f1f5f9;
+            font-family: -apple-system, system-ui, sans-serif;
         }
 
-        /* Barre d'état et En-tête */
         header {
-            background-color: var(--primary);
-            color: #fff;
-            padding: 18px 20px;
+            background: #1e293b;
+            color: white;
+            padding: 20px;
             text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            font-weight: bold;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        header h1 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: 0.5px;
-        }
-
-        /* Conteneur principal */
-        .app-container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px 15px 60px 15px; /* Grand padding bas pour les doigts */
-        }
-
-        h2 { font-size: 1.1rem; color: var(--primary); margin: 35px 0 15px 0; border-left: 4px solid var(--primary); padding-left: 10px; }
-
-        /* Style des cartes */
-        .card { 
-            background: var(--surface); 
-            padding: 20px; 
-            border-radius: 16px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-            margin-bottom: 25px;
-            position: relative;
-        }
-
-        /* Styles de saisie mobile */
-        .input-group { margin-bottom: 18px; }
-        
-        label { 
-            font-weight: 600; 
-            font-size: 0.8rem; 
-            color: var(--text-secondary); 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        input, select { 
+        .container {
+            padding: 15px;
             width: 100%;
-            padding: 16px; 
-            border: 2px solid var(--primary-light); 
-            border-radius: 12px; 
-            font-size: 1.1rem;
-            background: #fff;
-            color: var(--text-main);
-            outline: none;
-            box-sizing: border-box; /* Crucial pour le mobile */
-            -webkit-appearance: none;
         }
-        
-        input:focus { border-color: var(--primary); }
 
-        /* Zone de résultats principaux */
-        .results-highlight { 
-            background: #F8FAFC;
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            display: block;
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 16px; /* 16px minimum pour éviter le zoom auto iOS */
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        input:focus { border-color: #334155; }
+
+        /* Grille de résultats */
+        .res-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .res-item {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .res-item span { display: block; }
+        .res-label { font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px; }
+        .res-val { font-weight: 800; font-size: 1rem; color: #1e293b; }
+
+        .total-banner {
+            background: #1e293b;
+            color: white;
             padding: 15px;
             border-radius: 12px;
-            margin-top: 15px;
-        }
-
-        .result-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .result-row:last-child { margin-bottom: 0; }
-
-        .res-label { font-size: 0.95rem; color: var(--text-secondary); }
-        .res-val { font-weight: 700; font-size: 1.2rem; }
-
-        /* Le "Coup de Poing" du coût total */
-        .total-highlight {
-            grid-column: span 2; 
-            background: var(--primary); 
-            color: white; 
-            padding: 18px;
-            border-radius: 12px;
             text-align: center;
             margin-top: 15px;
         }
-        .total-label { color:rgba(255,255,255,0.7); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        .total-val { display: block; font-weight: 800; font-size: 1.8rem; margin-top: 5px; }
 
-        /* Boutons tactiles */
+        .total-banner .val { font-size: 1.6rem; font-weight: 900; display: block; }
+
         .btn-add {
-            width: 100%;
-            background: var(--secondary);
+            background: #166534;
             color: white;
             border: none;
+            width: 100%;
             padding: 18px;
             border-radius: 14px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(22, 101, 52, 0.2);
-            -webkit-tap-highlight-color: transparent;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 30px;
         }
 
-        .btn-add:active { opacity: 0.8; }
-
-        /* Style des Tags de différence */
-        .diff-tag { font-size: 0.75rem; padding: 4px 10px; border-radius: 20px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
-        .tag-pos { background: #DCFCE7; color: #166534; }
-        .tag-neg { background: #FEE2E2; color: #991B1B; }
-
-        /* Bouton de suppression subtil */
-        .delete-btn { 
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            color: var(--primary-light); 
-            font-size: 1.6rem;
-            cursor: pointer; 
-            -webkit-tap-highlight-color: transparent;
+        .diff-tag {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-top: 5px;
+            display: inline-block;
         }
-        .delete-btn:active { color: var(--danger); }
+        .pos { background: #dcfce7; color: #166534; }
+        .neg { background: #fee2e2; color: #991b1b; }
+
+        .delete-icon {
+            float: right;
+            color: #cbd5e0;
+            font-size: 1.5rem;
+            line-height: 1;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>SimuPaie Pro</h1>
-</header>
+<header>SimuPaie Pro</header>
 
-<div class="app-container">
-    <div id="employee-list">
-        </div>
+<div class="container">
+    <div id="list"></div>
+    
+    <button class="btn-add" onclick="addCard()">+ Ajouter un employé</button>
 
-    <button class="btn-add" onclick="addEmployeeCard()">+ Ajouter une simulation</button>
-
-    <h2>Changement d'heures (Prorata)</h2>
-    <div class="card">
-        <div class="input-group">
-            <label>Salaire Net actuel (€)</label>
-            <input type="number" id="baseNet" value="1650" oninput="runComparison()" placeholder="Ex: 2300">
-        </div>
+    <div class="card" style="border-top: 4px solid #334155;">
+        <label>Comparateur (Net Actuel)</label>
+        <input type="number" id="base" value="1650" oninput="compare()">
         
-        <div style="display: flex; gap: 15px;">
+        <div style="display: flex; gap: 10px;">
             <div style="flex:1">
                 <label>Heures Départs</label>
-                <input type="number" id="hStart" value="39" oninput="runComparison()">
+                <input type="number" id="h1" value="39" oninput="compare()">
             </div>
             <div style="flex:1">
-                <label>Nouv. Heures</label>
-                <input type="number" id="hEnd" value="24" oninput="runComparison()">
+                <label>Heures Fins</label>
+                <input type="number" id="h2" value="24" oninput="compare()">
             </div>
         </div>
 
-        <div class="results-highlight">
-            <div class="result-row">
-                <span class="res-label">Nouveau Salaire Net</span>
-                <div style="text-align:right">
-                    <span class="res-val" id="compNet">0 €</span>
-                    <span id="diffNetLabel" class="diff-tag"></span>
-                </div>
+        <div class="res-grid">
+            <div class="res-item">
+                <span class="res-label">Nouv. Net</span>
+                <span class="res-val" id="rNet">0 €</span>
+                <span id="dNet" class="diff-tag"></span>
             </div>
-            <div class="result-row">
-                <span class="res-label">Nouveau Coût Total</span>
-                <div style="text-align:right">
-                    <span class="res-val" id="compCost">0 €</span>
-                    <span id="diffCostLabel" class="diff-tag"></span>
-                </div>
+            <div class="res-item">
+                <span class="res-label">Nouv. Coût</span>
+                <span class="res-val" id="rCost">0 €</span>
+                <span id="dCost" class="diff-tag"></span>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    // --- CALCULS SOCIAUX (MODE FRANCE SANS DÉTAIL) ---
-    function getDetails(net, type) {
-        let brut, patronal;
-        if (type === "apprenti") {
-            brut = net;
-            patronal = net * 0.05; 
-        } else {
-            brut = net * 1.282; // Remontée vers le brut
-            let ratio = brut / 1766; // SMIC
-            // Simulation dégréssivité Fillon (Charges patronales)
-            if (ratio < 1.6) patronal = brut * 0.12;
-            else if (ratio < 2.5) patronal = brut * 0.32;
-            else patronal = brut * 0.45;
+    function getCalc(net, isApp) {
+        let br, pat;
+        if (isApp) { br = net; pat = net * 0.05; }
+        else {
+            br = net * 1.282;
+            let r = br / 1766;
+            pat = (r < 1.6) ? br * 0.12 : (r < 2.5) ? br * 0.32 : br * 0.45;
         }
-        return { 
-            brut: Math.round(brut), 
-            pat: Math.round(patronal), 
-            total: Math.round(brut + patronal) 
-        };
+        return { br: Math.round(br), pat: Math.round(pat), tot: Math.round(br + pat) };
     }
 
-    // --- INTERFACE MOBILE ---
-    function addEmployeeCard() {
+    function addCard() {
         const id = Date.now();
-        const html = `
-            <div class="card" id="card-${id}">
-                <div class="delete-btn" onclick="removeCard(${id})">&times;</div>
-                <div class="input-group">
-                    <label>Type de profil</label>
-                    <select class="type" onchange="updateCard(${id})">
-                        <option value="35h">Salaire Standard (Charges)</option>
-                        <option value="apprenti">Apprenti (Exonéré)</option>
-                    </select>
+        document.getElementById('list').insertAdjacentHTML('beforeend', `
+            <div class="card" id="${id}">
+                <span class="delete-icon" onclick="document.getElementById('${id}').remove(); compare()">&times;</span>
+                <label>Profil</label>
+                <select onchange="up(${id})" class="t">
+                    <option value="s">Salarié Standard</option>
+                    <option value="a">Apprenti</option>
+                </select>
+                <label>Net (€)</label>
+                <input type="number" class="n" value="1650" oninput="up(${id})">
+                <div class="res-grid">
+                    <div class="res-item"><span class="res-label">Brut</span><span class="res-val b">0 €</span></div>
+                    <div class="res-item"><span class="res-label">Charges Pat.</span><span class="res-val p">0 €</span></div>
                 </div>
-                <div class="input-group">
-                    <label>Salaire Net Souhaité (€)</label>
-                    <input type="number" class="net-val" value="1650" oninput="updateCard(${id})" placeholder="Ex: 2300">
-                </div>
-                
-                <div class="results-highlight">
-                    <div class="result-row">
-                        <span class="res-label">Brut estimé</span>
-                        <span class="res-val brut-res">0 €</span>
-                    </div>
-                    <div class="result-row">
-                        <span class="res-label">Part Patronale</span>
-                        <span class="res-val pat-res">0 €</span>
-                    </div>
-                </div>
-                <div class="total-highlight">
-                    <span class="total-label">Coût Total Mensuel</span>
-                    <span class="total-val total-res">0 €</span>
-                </div>
+                <div class="total-banner"><span class="res-label" style="color:#94a3b8">Coût Total</span><span class="val t-res">0 €</span></div>
             </div>
-        `;
-        document.getElementById('employee-list').insertAdjacentHTML('beforeend', html);
-        updateCard(id);
+        `);
+        up(id);
     }
 
-    function removeCard(id) {
-        const card = document.getElementById(`card-${id}`);
-        if(card) card.remove();
+    function up(id) {
+        const c = document.getElementById(id);
+        const net = parseFloat(c.querySelector('.n').value) || 0;
+        const res = getCalc(net, c.querySelector('.t').value === 'a');
+        c.querySelector('.b').innerText = res.br.toLocaleString() + " €";
+        c.querySelector('.p').innerText = res.pat.toLocaleString() + " €";
+        c.querySelector('.t-res').innerText = res.tot.toLocaleString() + " €";
+        compare();
     }
 
-    function updateCard(id) {
-        const card = document.getElementById(`card-${id}`);
-        if(!card) return;
-        const net = parseFloat(card.querySelector('.net-val').value) || 0;
-        const type = card.querySelector('.type').value;
-        const res = getDetails(net, type);
-
-        // Formatage en Euros standard
-        const f = (val) => val.toLocaleString('fr-FR') + " €";
-
-        card.querySelector('.brut-res').innerText = f(res.brut);
-        card.querySelector('.pat-res').innerText = f(res.pat);
-        card.querySelector('.total-res').innerText = f(res.total);
-        runComparison();
+    function compare() {
+        const b = parseFloat(document.getElementById('base').value) || 0;
+        const h1 = parseFloat(document.getElementById('h1').value) || 1;
+        const h2 = parseFloat(document.getElementById('h2').value) || 0;
+        const nN = Math.round(b * (h2 / h1));
+        const c1 = getCalc(b, false).tot;
+        const c2 = getCalc(nN, false).tot;
+        
+        document.getElementById('rNet').innerText = nN.toLocaleString() + " €";
+        document.getElementById('rCost').innerText = c2.toLocaleString() + " €";
+        
+        const dN = nN - b;
+        document.getElementById('dNet').innerText = (dN > 0 ? "+" : "") + dN + " €";
+        document.getElementById('dNet').className = "diff-tag " + (dN >= 0 ? "pos" : "neg");
+        
+        const dC = c2 - c1;
+        document.getElementById('dCost').innerText = (dC > 0 ? "+" : "") + dC + " €";
+        document.getElementById('dCost').className = "diff-tag " + (dC <= 0 ? "pos" : "neg");
     }
 
-    function runComparison() {
-        const netBase = parseFloat(document.getElementById('baseNet').value) || 0;
-        const hS = parseFloat(document.getElementById('hStart').value) || 1;
-        const hE = parseFloat(document.getElementById('hEnd').value) || 0;
-
-        const newNet = Math.round(netBase * (hE / hS));
-        const oldCost = getDetails(netBase, "35h").total;
-        const newCost = getDetails(newNet, "35h").total;
-
-        // Formatage en Euros standard
-        const f = (val) => val.toLocaleString('fr-FR') + " €";
-
-        document.getElementById('compNet').innerText = f(newNet);
-        document.getElementById('compCost').innerText = f(newCost);
-
-        // Différence Net
-        const dNet = newNet - netBase;
-        const dNetL = document.getElementById('diffNetLabel');
-        dNetL.innerText = (dNet > 0 ? "↑ +" : "↓ ") + f(dNet);
-        dNetL.className = "diff-tag " + (dNet >= 0 ? "tag-pos" : "tag-neg");
-
-        // Différence Coût
-        const dCost = newCost - oldCost;
-        const dCostL = document.getElementById('diffCostLabel');
-        dCostL.innerText = (dCost > 0 ? "↑ +" : "↓ ") + f(dCost);
-        dCostL.className = "diff-tag " + (dCost <= 0 ? "tag-pos" : "tag-neg");
-    }
-
-    // PWA Service Worker
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
-        });
-    }
-
-    // Lancer une carte par défaut
-    window.onload = () => {
-        addEmployeeCard();
-        runComparison();
-    };
+    window.onload = () => { addCard(); };
 </script>
-
 </body>
 </html>
