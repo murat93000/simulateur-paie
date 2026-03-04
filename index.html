@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SimuPaie - Simulateur de Coût Salarial</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2b6cb0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png">
+
+    <style>
+        :root {
+            --primary: #2b6cb0;
+            --secondary: #2f855a;
+            --danger: #c53030;
+            --bg: #f7fafc;
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background-color: var(--bg); 
+            margin: 0; 
+            padding: 15px;
+            color: #2d3748;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container { max-width: 600px; margin: auto; padding-bottom: 40px; }
+
+        h1 { font-size: 1.6rem; text-align: center; color: var(--primary); margin: 10px 0 20px 0; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        h2 { font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-top: 30px; color: #4a5568; }
+
+        .card { 
+            background: white; 
+            padding: 18px; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .row { display: flex; flex-direction: column; margin-bottom: 12px; }
+        label { font-weight: bold; font-size: 0.85rem; margin-bottom: 6px; color: #718096; }
+
+        input, select { 
+            padding: 12px; 
+            border: 1px solid #cbd5e0; 
+            border-radius: 10px; 
+            font-size: 1rem;
+            background: #fff;
+            color: #2d3748;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus { border-color: var(--primary); }
+
+        .grid-results { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin-top: 15px; 
+        }
+
+        .res-box { 
+            background: #f1f5f9; 
+            padding: 12px; 
+            border-radius: 10px; 
+            text-align: center;
+        }
+
+        .res-label { font-size: 0.7rem; color: #718096; text-transform: uppercase; letter-spacing: 0.5px; }
+        .res-val { font-weight: bold; font-size: 1.1rem; display: block; margin-top: 4px; }
+
+        .total-box { 
+            grid-column: span 2; 
+            background: var(--primary); 
+            color: white; 
+            padding: 15px;
+        }
+
+        .btn-add {
+            width: 100%;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-top: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(47, 133, 90, 0.2);
+        }
+
+        .comp-header { display: flex; justify-content: space-between; gap: 10px; }
+        .comp-header div { flex: 1; }
+
+        .diff-tag { font-size: 0.75rem; padding: 3px 8px; border-radius: 20px; font-weight: bold; margin-top: 5px; display: inline-block; }
+        .tag-pos { background: #c6f6d5; color: #22543d; }
+        .tag-neg { background: #fed7d7; color: #822727; }
+
+        .delete-btn { 
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #a0aec0; 
+            font-size: 1.5rem;
+            cursor: pointer; 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>SimuPaie</h1>
+
+    <div id="employee-list">
+        </div>
+
+    <button class="btn-add" onclick="addEmployeeCard()">+ Ajouter un employé</button>
+
+    <h2>Changement d'heures (Prorata)</h2>
+    <div class="card">
+        <div class="row">
+            <label>Salaire Net de référence (€)</label>
+            <input type="number" id="baseNet" value="1650" oninput="runComparison()" placeholder="Ex: 2300">
+        </div>
+        <div class="comp-header">
+            <div>
+                <label>H. Actuelles</label>
+                <input type="number" id="hStart" value="39" oninput="runComparison()">
+            </div>
+            <div>
+                <label>Nouv. Heures</label>
+                <input type="number" id="hEnd" value="24" oninput="runComparison()">
+            </div>
+        </div>
+
+        <div class="grid-results">
+            <div class="res-box">
+                <span class="res-label">Nouveau Net</span>
+                <span class="res-val" id="compNet">0 €</span>
+                <span id="diffNetLabel" class="diff-tag"></span>
+            </div>
+            <div class="res-box">
+                <span class="res-label">Nouveau Coût</span>
+                <span class="res-val" id="compCost">0 €</span>
+                <span id="diffCostLabel" class="diff-tag"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- CALCULS SOCIAUX ---
+    function getDetails(net, type) {
+        let brut, patronal;
+        if (type === "apprenti") {
+            brut = net;
+            patronal = net * 0.05; // Forfaitaire pour mutuelle/taxes
+        } else {
+            brut = net * 1.282; // Remontée vers le brut
+            let ratio = brut / 1766; // Ratio SMIC
+            // Simulation réduction Fillon simplifiée
+            if (ratio < 1.6) patronal = brut * 0.12;
+            else if (ratio < 2.5) patronal = brut * 0.32;
+            else patronal = brut * 0.45;
+        }
+        return { 
+            brut: Math.round(brut), 
+            pat: Math.round(patronal), 
+            total: Math.round(brut + patronal) 
+        };
+    }
+
+    // --- INTERFACE ---
+    function addEmployeeCard() {
+        const id = Date.now();
+        const html = `
+            <div class="card" id="card-${id}">
+                <div class="delete-btn" onclick="removeCard(${id})">&times;</div>
+                <div class="row">
+                    <label>Type de profil</label>
+                    <select class="type" onchange="updateCard(${id})">
+                        <option value="35h">Salarié (Charges Classiques)</option>
+                        <option value="apprenti">Apprenti (Exonéré)</option>
+                    </select>
+                </div>
+                <div class="row">
+                    <label>Salaire Net (€)</label>
+                    <input type="number" class="net-val" value="1650" oninput="updateCard(${id})" placeholder="Entrez le net">
+                </div>
+                <div class="grid-results">
+                    <div class="res-box">
+                        <span class="res-label">Brut (est.)</span>
+                        <span class="brut-res">0 €</span>
+                    </div>
+                    <div class="res-box">
+                        <span class="res-label">Charges Pat.</span>
+                        <span class="pat-res">0 €</span>
+                    </div>
+                    <div class="res-box total-box">
+                        <span class="res-label" style="color:rgba(255,255,255,0.7)">Coût Total Employeur</span>
+                        <span class="total-res">0 €</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.getElementById('employee-list').insertAdjacentHTML('beforeend', html);
+        updateCard(id);
+    }
+
+    function removeCard(id) {
+        const card = document.getElementById(`card-${id}`);
+        if(card) card.remove();
+    }
+
+    function updateCard(id) {
+        const card = document.getElementById(`card-${id}`);
+        if(!card) return;
+        const net = parseFloat(card.querySelector('.net-val').value) || 0;
+        const type = card.querySelector('.type').value;
+        const res = getDetails(net, type);
+
+        card.querySelector('.brut-res').innerText = res.brut.toLocaleString('fr-FR') + " €";
+        card.querySelector('.pat-res').innerText = res.pat.toLocaleString('fr-FR') + " €";
+        card.querySelector('.total-res').innerText = res.total.toLocaleString('fr-FR') + " €";
+        runComparison();
+    }
+
+    function runComparison() {
+        const netBase = parseFloat(document.getElementById('baseNet').value) || 0;
+        const hS = parseFloat(document.getElementById('hStart').value) || 1;
+        const hE = parseFloat(document.getElementById('hEnd').value) || 0;
+
+        const newNet = Math.round(netBase * (hE / hS));
+        const oldCost = getDetails(netBase, "35h").total;
+        const newCost = getDetails(newNet, "35h").total;
+
+        document.getElementById('compNet').innerText = newNet.toLocaleString('fr-FR') + " €";
+        document.getElementById('compCost').innerText = newCost.toLocaleString('fr-FR') + " €";
+
+        // Différence Net
+        const dNet = newNet - netBase;
+        const dNetL = document.getElementById('diffNetLabel');
+        dNetL.innerText = (dNet > 0 ? "+" : "") + dNet.toLocaleString('fr-FR') + " €";
+        dNetL.className = "diff-tag " + (dNet >= 0 ? "tag-pos" : "tag-neg");
+
+        // Différence Coût
+        const dCost = newCost - oldCost;
+        const dCostL = document.getElementById('diffCostLabel');
+        dCostL.innerText = (dCost > 0 ? "+" : "") + dCost.toLocaleString('fr-FR') + " €";
+        dCostL.className = "diff-tag " + (dCost <= 0 ? "tag-pos" : "tag-neg");
+    }
+
+    // Enregistrement PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+        });
+    }
+
+    // Lancer une carte par défaut
+    window.onload = () => {
+        addEmployeeCard();
+        runComparison();
+    };
+</script>
+
+</body>
+</html>

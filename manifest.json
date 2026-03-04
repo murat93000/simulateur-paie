@@ -1,0 +1,17 @@
+{
+  "name": "Simulateur Coût Salarial",
+  "short_name": "SimuPaie",
+  "description": "Calculez le coût employeur et les changements d'heures.",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2b6cb0",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
